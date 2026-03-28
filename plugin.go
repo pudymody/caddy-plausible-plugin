@@ -114,7 +114,7 @@ func (m *PlausiblePlugin) recordEvent(r *http.Request, status int) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", r.Header.Get("User-Agent"))
 	ip := extractIp(r)
-	req.Header.Set("X-Forwarded-For", ip)
+	req.Header.Set("x-vince-ip", ip)
 
 	m.logger.Debug("sending plausible event", zap.String("domain", event.Domain), zap.String("url", event.Url), zap.String("ip", ip))
 
