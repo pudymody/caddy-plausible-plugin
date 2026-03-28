@@ -83,7 +83,7 @@ func (m *PlausiblePlugin) recordEvent(r *http.Request, status int) {
 
 	event := EventPayload{
 		Name:     "pageview",
-		Url:      r.URL.RequestURI(),
+		Url:      r.URL.String(),
 		Domain:   m.DomainName,
 		Referrer: r.Referer(),
 	}
