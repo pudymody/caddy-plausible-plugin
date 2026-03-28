@@ -63,21 +63,23 @@ func (m *PlausiblePlugin) Provision(ctx caddy.Context) error {
 }
 
 func (m *PlausiblePlugin) ServeHTTP(w http.ResponseWriter, r *http.Request, h caddyhttp.Handler) error {
-	rw := &responseWriter{ResponseWriter: w}
+	rw := caddyhttp.NewResponseRecorder(w, nil, nil)
 	req := r.Clone(context.TODO()) // request might be modified by subsequent middleware (e.g. php_fastcgi)
 	if err := h.ServeHTTP(rw, r); err != nil {
 		return err
 	}
-	go m.recordEvent(req, rw.statusCode)
+	go m.recordEvent(req, rw.Status())
 	return nil
 }
 
 func (m *PlausiblePlugin) recordEvent(r *http.Request, status int) {
 	if status >= 400 {
+		m.logger.Debug("plausible event ignored because status", zap.String("domain", m.DomainName), zap.String("url", r.URL.String()), zap.Int("status", status))
 		return // don't record events for error statuses
 	}
 
 	if regexStaticAssets.MatchString(r.URL.Path) {
+		m.logger.Debug("plausible event ignored because static asset", zap.String("domain", m.DomainName), zap.String("url", r.URL.String()))
 		return // don't record typical static web assets like css, js, fonts, images and other media
 	}
 
