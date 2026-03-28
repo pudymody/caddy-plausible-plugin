@@ -81,9 +81,17 @@ func (m *PlausiblePlugin) recordEvent(r *http.Request, status int) {
 		return // don't record typical static web assets like css, js, fonts, images and other media
 	}
 
+	scheme := "http"
+	if r.TLS != nil {
+			scheme = "https"
+	}
+
+	host := m.DomainName
+	fullURL := scheme + "://" + host + r.URL.RequestURI()
+
 	event := EventPayload{
 		Name:     "pageview",
-		Url:      r.URL.String(),
+		Url:      fullURL,
 		Domain:   m.DomainName,
 		Referrer: r.Referer(),
 	}
