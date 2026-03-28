@@ -87,7 +87,12 @@ func (m *PlausiblePlugin) recordEvent(r *http.Request, status int) {
 	}
 
 	host := m.DomainName
-	fullURL := scheme + "://" + host + r.URL.RequestURI()
+	uri := r.URL.RequestURI()
+	if !strings.HasPrefix(uri, "/") {
+		uri = "/" + uri
+	}
+
+	fullURL := scheme + "://" + host + uri
 
 	event := EventPayload{
 		Name:     "pageview",
@@ -108,9 +113,10 @@ func (m *PlausiblePlugin) recordEvent(r *http.Request, status int) {
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", r.Header.Get("User-Agent"))
-	req.Header.Set("X-Forwarded-For", extractIp(r))
+	ip := extractIp(r)
+	req.Header.Set("X-Forwarded-For", ip)
 
-	m.logger.Debug("sending plausible event", zap.String("domain", event.Domain), zap.String("url", event.Url))
+	m.logger.Debug("sending plausible event", zap.String("domain", event.Domain), zap.String("url", event.Url), zap.String("ip", ip))
 
 	res, err := m.client.Do(req)
 	if err != nil {
