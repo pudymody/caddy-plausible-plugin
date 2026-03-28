@@ -1,4 +1,4 @@
-module github.com/muety/caddy-plausible-plugin
+module github.com/pudymody/caddy-plausible-plugin
 
 go 1.25
 
